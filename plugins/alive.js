@@ -33,7 +33,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
   
   
       }else
-    if (!formMe && text !='' && text !=null) {
+    if (!formMe) {
       
     
     c.sendMessage(jid, {
