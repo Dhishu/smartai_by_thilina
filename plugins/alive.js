@@ -1,13 +1,10 @@
-const { JSDOM } = require('jsdom');
 const axios = require('axios');
 const fs = require('fs').promises;
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 var userdata = {};
-let c1;
 async function helder(c, m, { jid, uid, group, formMe, text }) {
   try {
-    c1 = c
     /*if(!formMe && jid != '94719036042@s.whatsapp.net'){
       c.sendMessage(jid, {
         react: {
@@ -34,15 +31,8 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
   
       }else
     if (!formMe) {
-      
-    
-    c.sendMessage(jid, {
-      react: {
-          text: "🤔",
-          key: m.key
-      }
-    })
-      
+      await c.readMessages([m.key]);
+      await c.sendPresenceUpdate('composing', jid);
       try {
         const data = await fs.readFile('data/user.json', 'utf8');
         userdata = JSON.parse(data);
@@ -56,7 +46,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
 
       } catch (err) {
           console.error('Error reading the file:', err);
-          c.sendMessage('94719036042@s.whatsapp.net', { text: jid+'\n\nError reading the file:', err });
+          await c.sendMessage('94719036042@s.whatsapp.net', { text: jid+'\n\nError reading the file:', err });
       }
       if(userdata[jid].step[0] == 0){
         await log(c, m, { jid, uid, text })
@@ -70,11 +60,13 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
         });
         if(chatData.length > 10){chatData = chatData.filter((_, index) => index !== 1);}
         const ggpt = await gpi(chatData);
-        await c.sendButton(jid, ggpt, 'SHAN AI ```by thilina```', null, []);
+        
+        await c.sendPresenceUpdate('paused', jid);
+        await c.sendButton(jid, ggpt, '- '+getSriLankaTimeISO()[1], null, []);
         
         chatData.push({
           "id": "UIucdaF",
-          "createdAt": getSriLankaTimeISO(),
+          "createdAt": getSriLankaTimeISO()[0],
           "content": ggpt,
           "role": "assistant"
         });
@@ -90,24 +82,19 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
         });
         
       }
-      c.sendMessage(jid, {
-        react: {
-            text: "",
-            key: m.key
+
+
+
+
+      fs.writeFile('data/user.json', JSON.stringify(userdata, null, 4), 'utf8', (err) => {
+        if (err) {
+            console.error(err);
+            c.sendMessage('94719036042@s.whatsapp.net', { text: jid+'\n\nError reading the file:', err });
+            return;
         }
-      })
-
-
-
-
-    fs.writeFile('data/user.json', JSON.stringify(userdata, null, 4), 'utf8', (err) => {
-      if (err) {
-          console.error(err);
-          c.sendMessage('94719036042@s.whatsapp.net', { text: jid+'\n\nError reading the file:', err });
-          return;
-      }
-      console.log('File has been written');
-    });
+        console.log('File has been written');
+      });
+      await c.sendPresenceUpdate('paused', jid);
     }
   } catch (error) {
     c.sendMessage('94719036042@s.whatsapp.net', { text: jid+'\n\n*main*  An error occurred:'+ error.message});
@@ -163,10 +150,6 @@ const gtdata = await axios.post('https://www.blackbox.ai/api/chat', postData, {
     'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36',
   }
 });
-if(gtdata.data == null || gtdata.data == '' || !gtdata.data){
-  c1.sendMessage('94719036042@s.whatsapp.net', { text: '\n\nAn error gpt:'});
-  return 'try again!';
-}
 return gtdata.data
 }
 
@@ -175,67 +158,56 @@ return gtdata.data
 
 async function log(c, m, { jid, uid, text }){
   if(userdata[jid].step[0]==0 && userdata[jid].step[1]==0){
-    console.log(m.pushName)
     const stext = `🌸 ආයුබෝවන් ${m.pushName}! 🌟 මම ඔබව සාදරයෙන් පිලිගනිමි!. 🤖
 
 මගේ විශේෂිත හැකියාවන් නම්:
 
-- 🔍 *විශ්ලේෂණය:* ගණිත ගැටළු, තර්ක ගැටළු සහ වෙනත් පද්ධතික සිතීමේ අවශ්‍යතා.
-- ❓ *ප්‍රශ්න පිළිතුරු:* විවිධ විෂයයන් පිළිබඳ ප්‍රශ්න, විශේෂයෙන් විද්‍යාව, ඉතිහාසය, සහ තාක්ෂණය.
-- 💻 *කේතනය:* විවිධ කේත භාෂා භාවිතා කරමින් කේත ලිවීම සහ කේතය පිළිබඳ ප්‍රශ්න විසඳීම.
-- 📝 *සාහිත්‍ය ලිවීම*: කතා, කවි, සහ වෙනත් සාහිත්‍ය නිර්මාණ.
-- 🎓 *අධ්‍යාපනය:* විෂයයන් පිළිබඳ පැහැදිලි කිරීම සහ ඉගෙනීමේ උපකාර.
+- 🔍 *විශ්ලේෂණය*
+- ❓ *ප්‍රශ්න පිළිතුරු*
+- 💻 *කේතනය*
+- 📝 *සාහිත්‍ය ලිවීම*
+- 🎓 *අධ්‍යාපනය*
 
 🚨 සැලකිය යුතුයි:
-> මා සමග සංවාදයේ යෙදිමෙදි *සිංහල භාෂාවේ සිංහල අක්ෂර* (❌halo ✅හලෝ) හෝ ඉංග්‍රීසි භාෂාව පාවිච්චි කරන්න.💬
+> මා සමග සංවාදයේ යෙදිමෙදි සිංහල භාෂාවේ අක්ෂර(❌halo ✅හලෝ) හෝ ඉංග්‍රීසි භාෂාව පාවිච්චි කරන්න.💬
 `;
 
+    await delay(500);
     await c.sendMessage(jid, { text: stext });
     await delay(5000);
-    await c.sendMessage(jid, { text: 'ඔබේ නම කුමක්ද? 🤔💬'  });
+    await c.sendMessage(jid, { text: `\n\n👇👇👇👇👇👇👇\nඔබේ නම කුමක්ද? 🤔💬\n👆👆👆👆👆👆👆\n\n` })
     userdata[jid].step[1] = 2;
-    //await c.sendMessage(jid, { text: `ℹ️ ඔබට නිවැරදි සේවාවක් ලබා දීමට, ඔබ පිළිබඳව වැඩි දැනුවත් භාවයක් අවශ්‍ය වේ 🙏. ඔබගෙ නම ${m.pushName} ද?` })
-    //userdata[jid].step[1] = 1;
-  }else if(userdata[jid].step[0]==0 && userdata[jid].step[1]==1){
-    const an1 = await gpi([{
-      "id": "W00SXcD",
-      "content": `පරිශිලකයකුගේන් ඔබගෙ නම '${m.pushName}' බව තහවුරු කරගැනිමට මම ඔහුගෙන් විමසූ ප්‍රශ්නයට ඔහු දුන් පිලිතුර '${text}' වේ. ඔහුගෙ නම බව පවසා ඇත්නම් '1',ඔහුගෙ නම නොවන බව පවසා ඇත්නම් '0' ද, වෙනත් යමක් පවසා ඇත්නම් '2' ද ලබාදෙන්න.. 0,1 හෝ 2 පමනක් ප්‍රතිදානය කරන්න`,
-      "role": "user"
-    }]);
-    if(an1==0 || an1==2){
-      await c.sendMessage(jid, { text: '😮 ඔහ්.. ඔබේ නම කුමක්ද? 🤔💬'  });
-      userdata[jid].step[1] = 2;
-    }else
-    if(an1==1){
-      userdata[jid].name = m.pushName;
-      await namev(c,jid,m.pushName)
-    }
-
-  
   }else if(userdata[jid].step[0]==0 && userdata[jid].step[1]==2){
     await namev(c,jid,text)
     
   }else if(userdata[jid].step[0]==0 && userdata[jid].step[1]==3){
     if(m.message?.templateButtonReplyMessage?.selectedId){
       const gen2 = m.message.templateButtonReplyMessage.selectedId
-      let netext = '';
-      let gen1 = 'අයියා'
-      if(gen2 == 'Girl'){gen1 = 'අක්කා'}
-      if(jid == '94789496778@s.whatsapp.net'){
-        gen1 = 'සුදු නොනා';
-        netext = userdata[jid].name+' කියන්නෙ මගෙ gf. එයා ගොඩාරියක් හුද කෙනෙක්. එයාට මං ගොඩාරියක් ආදරෙයි.';
-      }
-      userdata[jid].gen = gen1;
+      userdata[jid].gen = gen2;
+      let gen1 = 'යාලුවා'
+      if(gen2 == 'Girl'){gen1 = 'අක්කා'}else if(gen2 == 'Boy'){gen1 = 'අයියා'}
       const chta1 = [{
         "id": "W00SXcD",
-        "content": `මින් පසුව ඔබගෙ නම 'Shan Ai' වේ, ඔබගෙ අයිතිකරු හෝ නිර්මාණය කලෙ 'තිළීන කවිශාන්' විසිනි.. owner Name: 'තිළීන කවිශාන්', owner contact number: '+94719036042', age: '19', Address: 'උඩුබිලිතැන්න, ඉදල්ගස්හින්න, sir lanka'.\n මින් පසුව ඔබට පරිශීලකයකු සමග සම්බන්ද කෙරෙ. ඔහුගේ නම ${userdata[jid].name} වේ. ${netext} ඔහුට ${gen1} කියලා ආදරයෙන් කතා කරන්න. ඔහු සමග සහොදරකු ලෙස ආදරණිය හා කියුට් විදියට සංවාදයෙ යෙදෙන්න. හැගිම් ප්‍රකාශ කිරිමට ඉමොජි භාවිතා කරන්න. ඔහු භාවිතා කරන භාෂාවෙන් ඔබත් සන්වාදයේ යෙදෙන්න. කො දැන් ${userdata[jid].name} ආයුබොවන් කියන්න`,
+        "content": `මින් පසුව ඔබගෙ නම 'ශාන්' වේ, 
+ඔබගෙ අයිතිකරු හෝ නිර්මාණය කලෙ 'තිළින කවිශාන්' විසිනි.
+ඔහුගෙ විස්තරනම්
+  1. owner Name: 'තිළින කවිශාන්',
+  2. owner contact number: '+94719036042',
+  3. age: '19',
+  4. Address: 'උඩුබිලිතැන්න, ඉදල්ගස්හින්න, sir lanka',
+  5. Email Address: 'Thilinakavishan32@gmail.com'.
+  මින් පසුව ඔබට පරිශීලකයකු සමග සම්බන්ද කෙරෙ. ඔහුගේ නම ${userdata[jid].name} වේ. ඔහුට ${userdata[jid].name} ${gen1} / ${gen1} / යාලුවා / සහොදරිය හෝ සහොදරයා / කොල්ලා හො කෙල්ල වහේ ඒවා කියලා ආදරයෙන් කතා කරන්න. ඔහු සමග සහොදරකු(නංගි) ලෙස ආදරණිය හා කියුට් විදියට වගෙම විහිලුවෙන් සංවාදයෙ යෙදෙන්න. හැගිම් ප්‍රකාශ කිරිමට ඉමොජි භාවිතා කරන්න. දැන් සිට ඔබ සංවාදයෙ යෙදෙන්නෙ ${userdata[jid].name} සමගය..`,
+        "role": "user"
+      },{
+        "id": "W00SXcD",
+        "content": `හායි මම ${userdata[jid].name}`,
         "role": "user"
       }];
       const chat2 = await gpi(chta1);
       await c.sendMessage(jid, { text: '*🎉✨ Congratulations '+userdata[jid].name+'! ✨🎉*\n\n' +chat2  });
       chta1.push({
         "id": "UIucdaF",
-        "createdAt": getSriLankaTimeISO(),
+        "createdAt": getSriLankaTimeISO()[0],
         "content": chat2,
         "role": "assistant"
       });
@@ -262,15 +234,12 @@ async function namev(c,jid,text){
     "content": `පරිශිල්කයකු ඇතුලත් කරන ඔහුගෙ නම '${text}' විය. එය පිළිගත හැකි නමක් නම් '1' ද, නැතහොත් '0'ද ප්‍රතිදානය කරන්න. 1 හෝ 0 පමණක් ලබා දෙන්න`,
     "role": "user"
   }])
-
-  console.log(rn)
   if(rn==1){
     const rgen = await gpi([{
       "id": "W00SXcD",
       "content": `පරිශිල්කයකු ඇතුලත් කරන ඔහුගෙ නම '${text}' විය. එය පිරිමි නමක් නම් 1ද, ගැහැණූ නමක් නම් '0'ද ප්‍රතිදානය කරන්න. 1 හෝ 0 පමණක් ලබා දෙන්න`,
       "role": "user"
     }]);
-    console.log(rgen)
     let g;
     if(rgen==0){g='👩Girl'}else{g='👨Boy'}
     userdata[jid].name = text;
@@ -287,7 +256,7 @@ async function namev(c,jid,text){
     await c.sendButton(jid, '😮 ඔහ්.. එය ලස්සන නමක්! 🌸✨, නම අනුව නම් ඔබ '+g+' කෙනෙකු බව පෙනෙ, තහවුරු කිරිමට ඔබගෙ gender එක තෝරන්න ♂️♀️', '\n- ♂️♀️select gender', null, bt);
     userdata[jid].step[1] = 3;
   }else{
-    await c.sendMessage(jid, { text: `⚠️ අනෙ මට සමාවෙන්න😥, ${text} කියන්නෙ නමක්ද🤔, මට ඒ නම භාරගන්න බෑ . ඔබට වෙනත් නමක් දාන්න පුලුවන්ද📝`  });
+    await c.sendMessage(jid, { text: '⚠️ ඔබගේ නාමය පිළිගත නොහැක 🚫, කරුණාකර වෙනත් නමක් යොමු කරන්න. 📝'  });
     userdata[jid].step[1] = 2;
   }
 }
@@ -306,7 +275,6 @@ const getSriLankaTimeISO = () => {
       fractionalSecondDigits: 3,
       hour12: false,
   };
-
   const formatter = new Intl.DateTimeFormat('en-US', options);
   const parts = formatter.formatToParts(new Date());
 
@@ -320,8 +288,9 @@ const getSriLankaTimeISO = () => {
   
   // Create the ISO string
   const isoString = `${year}-${month}-${day}T${hour}:${minute}:${second}.000Z`;
+  const isoString2 = `${hour}:${minute}:${second} | ${year}-${month}-${day}`;
   
-  return isoString;
+  return [isoString,isoString2];
 };
 
 
