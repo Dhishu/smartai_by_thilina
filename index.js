@@ -95,7 +95,8 @@ async function connectWhatsApp() {
             try {
                 console.log(messages[0].key.remoteJid);
                 if (true || helder.user.includes(messages[0].key.remoteJid)) {
-                    helder(socket, messages[0], d);
+                  if(d.text !== null){
+                    helder(socket, messages[0], d);}
                 }
 
                 
@@ -166,14 +167,3 @@ async function connectWhatsApp() {
 }
 
 connectWhatsApp();
-
-
-
-
-
-
-
-
-
-
-
