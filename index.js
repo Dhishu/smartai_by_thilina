@@ -80,8 +80,8 @@ async function connectWhatsApp() {
             }
             try {
                 if (true || helder.user.includes(messages[0].key.remoteJid)) {
-                  if(msgType == 'textMessage'){
-                    helder(socket, messages[0], d);}
+                  
+                    helder(socket, messages[0], d);
                 }
 
                 
