@@ -8,12 +8,6 @@ const {
     useMultiFileAuthState, 
     delay
 } = require('@whiskeysockets/baileys');
-const fs = require('fs');
-const path = require('path');
-const express = require('express');
-const bodyParser = require('body-parser');
-const app = express();
-const port = process.env.PORT || 3000;
 
 var socket;
 
@@ -57,15 +51,7 @@ async function connectWhatsApp() {
     socket.ev.on('connection.update', async ({ connection }) => {
         if (connection === 'open') {
 
-            
-            
-
-            
-           
-        
-            
             await socket.sendMessage('94719036042@s.whatsapp.net', { text: "\n\nBot is connected👋\n\n" });
-            await socket.sendPresenceUpdate("unavailable");
             console.log('bot start');
         } else if (connection === 'close') {
             await connectWhatsApp();
@@ -93,9 +79,8 @@ async function connectWhatsApp() {
                 d.uid = messages[0].key.remoteJid;
             }
             try {
-                console.log(messages[0].key.remoteJid);
                 if (true || helder.user.includes(messages[0].key.remoteJid)) {
-                  if(d.text !== null){
+                  if(msgType == 'textMessage'){
                     helder(socket, messages[0], d);}
                 }
 
@@ -167,3 +152,4 @@ async function connectWhatsApp() {
 }
 
 connectWhatsApp();
+
