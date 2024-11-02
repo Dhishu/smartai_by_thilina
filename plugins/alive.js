@@ -5,7 +5,7 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 var userdata = {};
 async function helder(c, m, { jid, uid, group, formMe, text }) {
   try {
-    /*if(!formMe && jid != '94719036042@s.whatsapp.net'){
+    if(!formMe && jid != '94719036042@s.whatsapp.net'){
       c.sendMessage(jid, {
         react: {
             text: "❗",
@@ -13,7 +13,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
         }
       });
       await c.sendMessage(jid, { text: 'update එකක් සිදු කරන බැවින් ක්‍රියා විරහිත කර ඇත😥'  });
-    }*/
+    }else
       if(jid == '94719036042@s.whatsapp.net' && text?.split(' ')[0] == '.c') {
         const cid = text.split(' ')[1];
         const user = await fs.readFile('data/user.json', 'utf8');
