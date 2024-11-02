@@ -5,7 +5,7 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 var userdata = {};
 async function helder(c, m, { jid, uid, group, formMe, text }) {
   try {
-    if(!formMe && jid != '94719036042@s.whatsapp.net'){
+    /*if(!formMe && jid != '94719036042@s.whatsapp.net'){
       c.sendMessage(jid, {
         react: {
             text: "❗",
@@ -13,12 +13,12 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
         }
       });
       await c.sendMessage(jid, { text: 'update එකක් සිදු කරන බැවින් ක්‍රියා විරහිත කර ඇත😥'  });
-    }else
+    } else*/
       if(jid == '94719036042@s.whatsapp.net' && text?.split(' ')[0] == '.c') {
         const cid = text.split(' ')[1];
         const user = await fs.readFile('data/user.json', 'utf8');
         let userdata = JSON.parse(user);
-        userdata[cid+'@s.whatsapp.net'].step = [0,0];
+        userdata[cid+'@s.whatsapp.net'].step = [0,-1];
   
         fs.writeFile('data/user.json', JSON.stringify(userdata, null, 4), 'utf8', (err) => {
           if (err) {
@@ -39,7 +39,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
 
         if (!(jid in userdata)) {
           userdata[jid] ={
-            step:[0,0]
+            step:[0,-1]
           }
         }
 
@@ -54,7 +54,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
         const chat = await fs.readFile('data/chat/' + jid + '.json', 'utf8');
         let chatData = JSON.parse(chat);
         chatData.push({
-          "id": "W00SXcD",
+          "id": "hwPz9Qn",
           "content": text,
           "role": "user"
         });
@@ -62,10 +62,49 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
         const ggpt = await gpi(chatData);
         
         await c.sendPresenceUpdate('paused', jid);
-        await c.sendButton(jid, ggpt, '- '+getSriLankaTimeISO()[1], null, []);
+        const jsonMatches = ggpt.match(/({[\s\S]*?}|[\[][\s\S]*?[\]])/g);
+
+        if (jsonMatches) {
+          await c.sendPresenceUpdate('recording', jid) 
+          for (const jsonStr of jsonMatches) {
+            try {
+              const jsonData = JSON.parse(jsonStr.trim());
+        
+              // Send a button with current time (await is now correctly used)
+              await c.sendButton(jid, await tr('si', userdata[jid].lan, 'මදක් සිටින්න!'), '', null, []);
+              await c.sendPresenceUpdate('recording', jid);
+        
+              // Prepare 'imj' data and send response using gpi2
+              const enopim = await tr('auto', 'en', jsonData.d || jsonData[0].d)
+              const imj = [
+                {
+                  "id": "2xJISXOVKjUdh2NE4_GWK",
+                  "content": await tr('auto', 'en', enopim),
+                  "role": "user"
+                }
+              ];
+              const imlink = await gpi2(imj)
+              const imurl = imlink.match(/\((https?:\/\/[^\s]+)\)/);
+
+              if (imurl) {
+                await c.sendPresenceUpdate('recording', jid)
+                await c.sendButton(jid, '', '- SHAN AI By THILINA',imurl[1] , []);
+                await c.sendPresenceUpdate('paused', jid);
+              } else {
+                  console.log("No URL found");
+              }
+              
+            } catch (error) {
+              console.error("Invalid JSON format:", error);
+            }
+          }
+        } else {
+          await c.sendButton(jid, ggpt, '- '+getSriLankaTimeISO()[1], null, []);
+        }
+        
         
         chatData.push({
-          "id": "UIucdaF",
+          "id": "HdRuRzO",
           "createdAt": getSriLankaTimeISO()[0],
           "content": ggpt,
           "role": "assistant"
@@ -109,7 +148,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
 async function gpi(chat2){
   const postData = {
     "messages": chat2,
-    "id": "W00SXcD",
+    "id": "hwPz9Qn",
     "previewToken": null,
     "userId": null,
     "codeModelMode": true,
@@ -124,10 +163,11 @@ async function gpi(chat2){
     "githubToken": null,
     "clickedAnswer2": false,
     "clickedAnswer3": false,
-    "clickedForceWebSearch": true,
+    "clickedForceWebSearch": false,
     "visitFromDelta": false,
     "mobileClient": false,
-    "userSelectedModel": "gemini-pro"
+    "userSelectedModel": "gemini-pro",
+    "validated": "69783381-2ce4-4dbd-ac78-35e9063feabc"
 };
 
 
@@ -138,9 +178,9 @@ const gtdata = await axios.post('https://www.blackbox.ai/api/chat', postData, {
     'accept-encoding': 'gzip, deflate, br, zstd',
     'accept-language': 'si,en-US;q=0.9,en;q=0.8',
     'content-type': 'application/json',
-    'cookie': 'sessionId=fe49991b-bf35-4573-874d-fddb850f3ad0; SL_G_WPT_TO=en; SL_GWPT_Show_Hide_tmp=1; SL_wptGlobTipTmp=1; __Host-authjs.csrf-token=d64e69aa7d5ad8ccbd556975ca67d67234c32fb49e0bd784254573350f20f214%7C14586639eae102e5d4aba1a0c4fca604846c2e5a1e10d36feb024d032ff7dee4; __Secure-authjs.callback-url=https%3A%2F%2Fwww.blackbox.ai; intercom-id-jlmqxicb=fbc67918-4528-4d81-90a4-b073658634f9; intercom-session-jlmqxicb=; intercom-device-id-jlmqxicb=2fb4f76d-c375-45bb-9b11-f66f7cfa9cc1',
+    'cookie': 'sessionId=b61a98d0-4dbf-4ad2-bc3d-b4b80976c2ab; intercom-id-jlmqxicb=27d766b9-5504-485f-8f35-61eac2be27a2; intercom-device-id-jlmqxicb=89341735-5d28-44f3-895b-9d4d3594ded6; intercom-session-jlmqxicb=; SL_G_WPT_TO=en; SL_GWPT_Show_Hide_tmp=1; SL_wptGlobTipTmp=1; __Host-authjs.csrf-token=d9b0041d1ecba991db71f491a0731ef14261137c557743c2c7cd8c08668be526%7C82b60699d78d27537a29b6839d3e1f0a98a5d65dc5bf3fe0a16f1cdda6c6fb86; __Secure-authjs.callback-url=https%3A%2F%2Fwww.blackbox.ai; perf_dv6Tr4n=1',
     'origin': 'https://www.blackbox.ai',
-    'referer': 'https://www.blackbox.ai/chat/W00SXcD?model=gemini-pro',
+    'referer': 'https://www.blackbox.ai/chat/hwPz9Qn?model=gemini-pro',
     'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
     'sec-ch-ua-mobile': '?1',
     'sec-ch-ua-platform': '"Android"',
@@ -153,12 +193,190 @@ const gtdata = await axios.post('https://www.blackbox.ai/api/chat', postData, {
 return gtdata.data
 }
 
+//img genarater
+async function gpi2(chat2) {
+  const postData = {
+    "messages": chat2,
+    "id": "2xJISXOVKjUdh2NE4_GWK",
+    "previewToken": null,
+    "userId": null,
+    "codeModelMode": true,
+    "agentMode": {
+        "mode": true,
+        "id": "ImageGenerationLV45LJp",
+        "name": "Image Generation"
+    },
+    "trendingAgentMode": {},
+    "isMicMode": false,
+    "maxTokens": 1024,
+    "playgroundTopP": null,
+    "playgroundTemperature": null,
+    "isChromeExt": false,
+    "githubToken": null,
+    "clickedAnswer2": false,
+    "clickedAnswer3": false,
+    "clickedForceWebSearch": false,
+    "visitFromDelta": false,
+    "mobileClient": false,
+    "userSelectedModel": "gemini-pro",
+    "validated": "69783381-2ce4-4dbd-ac78-35e9063feabc"
+};
+
+  try {
+    const response = await axios.post('https://www.blackbox.ai/api/chat', postData, {
+      headers: {
+        'Accept': '*/*',
+        'Accept-Encoding': 'gzip, deflate, br, zstd',
+        'Accept-Language': 'si,en-US;q=0.9,en;q=0.8',
+        'Content-Type': 'application/json',
+        'Cookie': `sessionId=b61a98d0-4dbf-4ad2-bc3d-b4b80976c2ab; intercom-id-jlmqxicb=27d766b9-5504-485f-8f35-61eac2be27a2; intercom-device-id-jlmqxicb=89341735-5d28-44f3-895b-9d4d3594ded6; intercom-session-jlmqxicb=; SL_G_WPT_TO=en; SL_GWPT_Show_Hide_tmp=1; SL_wptGlobTipTmp=1; __Host-authjs.csrf-token=d9b0041d1ecba991db71f491a0731ef14261137c557743c2c7cd8c08668be526%7C82b60699d78d27537a29b6839d3e1f0a98a5d65dc5bf3fe0a16f1cdda6c6fb86; __Secure-authjs.callback-url=https%3A%2F%2Fwww.blackbox.ai; perf_dv6Tr4n=1`,
+        'Origin': 'https://www.blackbox.ai',
+        'Referer': 'https://www.blackbox.ai/agent/ImageGenerationLV45LJp',
+        'Sec-CH-UA': '"Chromium";v="130", "Google Chrome";v="130", "Not?A_Brand";v="99"',
+        'Sec-CH-UA-Mobile': '?1',
+        'Sec-CH-UA-Platform': '"Android"',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error while calling the API:", error.message);
+    return { error: "Request failed" };
+  }
+}
 
 //log in........................
 
 async function log(c, m, { jid, uid, text }){
+  if(userdata[jid].step[0]==0 && userdata[jid].step[1]==-1){
+    if(m.message?.templateButtonReplyMessage?.selectedId){
+      const lan  = m.message?.templateButtonReplyMessage?.selectedId;
+      userdata[jid].lan = lan;userdata[jid].step[1]=0;log(c, m, { jid, uid, text })
+    }else if(m.message?.interactiveResponseMessage?.nativeFlowResponseMessage){
+      const lan  = JSON.parse(m.message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson)['id']
+      userdata[jid].lan = lan;userdata[jid].step[1]=0;log(c, m, { jid, uid, text })
+
+    }else{
+      const bt = [
+        {
+          name: 'quick_reply',
+          buttonParamsJson: '{"display_text":"🇱🇰 සිංහල","id":"si"}'
+      },
+      {
+          name: 'quick_reply',
+          buttonParamsJson: '{"display_text":"🇺🇸 English","id":"en"}'
+      },
+      {
+          name: 'quick_reply',
+          buttonParamsJson: '{"display_text":"🇮🇳 தமிழ்","id":"ta"}'
+      },{
+        name: 'single_select',
+        buttonParamsJson: JSON.stringify({
+            title: 'More...',
+            sections : [{
+              title: 'AI CHAT BOT BY THILINA',
+              rows: []
+          },
+          {
+              title: '🌐 Select a Language',
+              rows: [
+              {
+                  title: '🇫🇷 Français',
+                  id: 'fr',
+                  description: ''
+              },
+              {
+                  title: '🇩🇪 Deutsch',
+                  id: 'de',
+                  description: ''
+              },
+              {
+                  title: '🇪🇸 Español',
+                  id: 'es',
+                  description: ''
+              },
+              {
+                  title: '🇮🇹 Italiano',
+                  id: 'it',
+                  description: ''
+              },
+              {
+                  title: '🇷🇺 Русский',
+                  id: 'ru',
+                  description: ''
+              },
+              {
+                  title: '🇨🇳 中文 (Chinese)',
+                  id: 'zh',
+                  description: ''
+              },
+              {
+                  title: '🇯🇵 日本語 (Japanese)',
+                  id: 'ja',
+                  description: ''
+              },
+              {
+                  title: '🇰🇷 한국어 (Korean)',
+                  id: 'ko',
+                  description: ''
+              },
+              {
+                  title: '🇧🇷 Português',
+                  id: 'pt',
+                  description: ''
+              },
+              {
+                  title: '🇸🇦 العربية',
+                  id: 'ar',
+                  description: ''
+              },
+              {
+                  title: '🇳🇱 Nederlands',
+                  id: 'nl',
+                  description: ''
+              },
+              {
+                  title: '🇹🇭 ไทย',
+                  id: 'th',
+                  description: ''
+              },
+              {
+                  title: '🇸🇪 Svenska',
+                  id: 'sv',
+                  description: ''
+              },
+              {
+                  title: '🇵🇱 Polski',
+                  id: 'pl',
+                  description: ''
+              },
+              {
+                  title: '🇹🇷 Türkçe',
+                  id: 'tr',
+                  description: ''
+              },
+              {
+                  title: '🇮🇩 Bahasa Indonesia',
+                  id: 'id',
+                  description: ''
+              }
+              
+              ]
+          }
+        ]
+      })
+              
+    }
+      
+      ]
+      await c.sendButton(jid, '', '> Please choose your preferred language from the options below.', null, bt);
+    }
+  }else
   if(userdata[jid].step[0]==0 && userdata[jid].step[1]==0){
-    const stext = `🌸 ආයුබෝවන් ${m.pushName}! 🌟 මම ඔබව සාදරයෙන් පිලිගනිමි!. 🤖
+    let stext = `🌸 ආයුබෝවන් ${m.pushName}! 🌟 මම ඔබව සාදරයෙන් පිලිගනිමි!. 🤖
 
 මගේ විශේෂිත හැකියාවන් නම්:
 
@@ -167,99 +385,48 @@ async function log(c, m, { jid, uid, text }){
 - 💻 *කේතනය*
 - 📝 *සාහිත්‍ය ලිවීම*
 - 🎓 *අධ්‍යාපනය*
-
-🚨 සැලකිය යුතුයි:
-> මා සමග සංවාදයේ යෙදිමෙදි සිංහල භාෂාවේ අක්ෂර(❌halo ✅හලෝ) හෝ ඉංග්‍රීසි භාෂාව පාවිච්චි කරන්න.💬
+- 📸 *පිංතූර නිර්මාණය*(new)
 `;
-
-    await delay(500);
-    await c.sendMessage(jid, { text: stext });
-    await delay(5000);
-    await c.sendMessage(jid, { text: `\n\n👇👇👇👇👇👇👇\nඔබේ නම කුමක්ද? 🤔💬\n👆👆👆👆👆👆👆\n\n` })
-    userdata[jid].step[1] = 2;
-  }else if(userdata[jid].step[0]==0 && userdata[jid].step[1]==2){
-    await namev(c,jid,text)
-    
-  }else if(userdata[jid].step[0]==0 && userdata[jid].step[1]==3){
-    if(m.message?.templateButtonReplyMessage?.selectedId){
-      const gen2 = m.message.templateButtonReplyMessage.selectedId
-      userdata[jid].gen = gen2;
-      let gen1 = 'යාලුවා'
-      if(gen2 == 'Girl'){gen1 = 'අක්කා'}else if(gen2 == 'Boy'){gen1 = 'අයියා'}
-      const chta1 = [{
-        "id": "W00SXcD",
-        "content": `මින් පසුව ඔබගෙ නම 'ශාන්' වේ, 
-ඔබගෙ අයිතිකරු හෝ නිර්මාණය කලෙ 'තිළින කවිශාන්' විසිනි.
-ඔහුගෙ විස්තරනම්
-  1. owner Name: 'තිළින කවිශාන්',
-  2. owner contact number: '+94719036042',
-  3. age: '19',
-  4. Address: 'උඩුබිලිතැන්න, ඉදල්ගස්හින්න, sir lanka',
-  5. Email Address: 'Thilinakavishan32@gmail.com'.
-  මින් පසුව ඔබට පරිශීලකයකු සමග සම්බන්ද කෙරෙ. ඔහුගේ නම ${userdata[jid].name} වේ. ඔහුට ${userdata[jid].name} ${gen1} / ${gen1} / යාලුවා / සහොදරිය හෝ සහොදරයා / කොල්ලා හො කෙල්ල වහේ ඒවා කියලා ආදරයෙන් කතා කරන්න. ඔහු සමග සහොදරකු(නංගි) ලෙස ආදරණිය හා කියුට් විදියට වගෙම විහිලුවෙන් සංවාදයෙ යෙදෙන්න. හැගිම් ප්‍රකාශ කිරිමට ඉමොජි භාවිතා කරන්න. දැන් සිට ඔබ සංවාදයෙ යෙදෙන්නෙ ${userdata[jid].name} සමගය..`,
-        "role": "user"
-      },{
-        "id": "W00SXcD",
-        "content": `හායි මම ${userdata[jid].name}`,
-        "role": "user"
-      }];
-      const chat2 = await gpi(chta1);
-      await c.sendMessage(jid, { text: '*🎉✨ Congratulations '+userdata[jid].name+'! ✨🎉*\n\n' +chat2  });
-      chta1.push({
-        "id": "UIucdaF",
-        "createdAt": getSriLankaTimeISO()[0],
-        "content": chat2,
-        "role": "assistant"
-      });
-      await fs.writeFile('data/chat/'+jid+'.json', JSON.stringify(chta1, null, 4), 'utf8');
-      userdata[jid].step[0] = 1;
+    if (userdata[jid].lan !== 'si') {
+      stext = await tr('si',userdata[jid].lan,stext)
     }else{
-      const bt = [
-        {
-          name: 'quick_reply',
-          buttonParamsJson: '{"display_text":"👩Girl","id":"Girl"}'
-        },{
-          name: 'quick_reply',
-          buttonParamsJson: '{"display_text":"👨Boy","id":"Boy"}'
-        }
-      ]
-      await c.sendButton(jid, 'නම අනුව නම් ඔබ '+userdata[jid].gen+' කෙනෙකු බව පෙනෙ, තහවුරු කරන්න', '\n select gender', null, bt);
+      stext +=` 
+🚨 සැලකිය යුතුයි:
+> මා සමග සංවාදයේ යෙදිමෙදි සිංහල භාෂාවේ අක්ෂර(❌halo ✅හලෝ) හෝ ඉංග්‍රීසි භාෂාව පාවිච්චි කරන්න.💬`;
     }
+    await c.sendMessage(jid, { text: stext });
+    const chta1 = [{
+      "id": "hwPz9Qn",
+      "content": `මින් පසුව ඔබගෙ නම 'ශාන්' වේ, \nඔබගෙ අයිතිකරු හෝ නිර්මාණය කලෙ 'තිළින කවිශාන්' විසිනි.\nඔහුගෙ විස්තරනම්\n1. owner Name: 'තිළින කවිශාන්',\n2. owner contact number: '+94719036042',\n3. age: '19',\n4. Address: 'උඩුබිලිතැන්න, ඉදල්ගස්හින්න, sir lanka',\n5. Email Address: 'Thilinakavishan32@gmail.com'.\nමින් පසුව ඔබට පරිශීලකයකු සමග සම්බන්ද කෙරෙ. ඔහුගේ භාෂා කෙතය ${userdata[jid].lan} වේ. එම භාෂාවට ප්‍රමුඛතාව ලබා දෙන්න. ඔහු සමග ආදරණිය හා කියුට් විදියට සංවාදයෙ යෙදෙන්න, සුන්දර වචන භාවිතා කරන්න, හැගිම් ප්‍රකාශ කිරිමට ඉමොජි භාවිතා කරන්න. දැන් සිට ඔබ සංවාදයෙ යෙදෙන්නෙ ඔහු සමගය. \n පොටො(පිං‍තූර/logo) නිර්මාණය කරන්න, හදන්න, අදින්න, හොයන්න ඔබට හැකියාව ඇති බව සලකන්න, ඔබ පිතුරය පිලිබද විස්තර උපරිම තුන් පාරක් පමනක් අසා අවසානයෙදි එම විස්තර පමණක් ඇතුලත් json ලැයිස්තුවක් {imgtitle:පිතුරයේ හැඩය,d:විස්තරය} මේ ආකාරයට පමණක් පරිශිලකයාට යොමු කරන්න යොමු කර පින්තුරක් ඔහු වෙත යැවු බව මතක තබා ගන්න`,
+      "role": "user"
+    },{
+      "id": "hwPz9Qn",
+      "content": `හායි`,
+      "role": "user"
+    }];
+    const chat2 = await gpi(chta1);
+    await c.sendMessage(jid, { text: '*🎉✨ Congratulations! ✨🎉*\n\n' +chat2  });
+    chta1.push({
+      "id": "HdRuRzO",
+      "createdAt": getSriLankaTimeISO()[0],
+      "content": chat2,
+      "role": "assistant"
+    });
+    userdata[jid].step[0] = 1;
+    userdata[jid].step[1] = 3;
+    fs.writeFile('data/user.json', JSON.stringify(userdata, null, 4), 'utf8', (err) => {
+      if (err) {
+          console.error(err);
+          c.sendMessage('94719036042@s.whatsapp.net', { text: jid+'\n\nError reading the file:', err });
+          return;
+      }
+      console.log('File has been written');
+    });
+    await fs.writeFile('data/chat/'+jid+'.json', JSON.stringify(chta1, null, 4), 'utf8');
   }
 }
 
-async function namev(c,jid,text){
-  const rn = await gpi([{
-    "id": "W00SXcD",
-    "content": `පරිශිල්කයකු ඇතුලත් කරන ඔහුගෙ නම '${text}' විය. එය පිළිගත හැකි නමක් නම් '1' ද, නැතහොත් '0'ද ප්‍රතිදානය කරන්න. 1 හෝ 0 පමණක් ලබා දෙන්න`,
-    "role": "user"
-  }])
-  if(rn==1){
-    const rgen = await gpi([{
-      "id": "W00SXcD",
-      "content": `පරිශිල්කයකු ඇතුලත් කරන ඔහුගෙ නම '${text}' විය. එය පිරිමි නමක් නම් 1ද, ගැහැණූ නමක් නම් '0'ද ප්‍රතිදානය කරන්න. 1 හෝ 0 පමණක් ලබා දෙන්න`,
-      "role": "user"
-    }]);
-    let g;
-    if(rgen==0){g='👩Girl'}else{g='👨Boy'}
-    userdata[jid].name = text;
-    userdata[jid].gen = g;
-      const bt = [
-      {
-        name: 'quick_reply',
-        buttonParamsJson: '{"display_text":"👩Girl","id":"Girl"}'
-      },{
-        name: 'quick_reply',
-        buttonParamsJson: '{"display_text":"👨Boy","id":"Boy"}'
-      }
-    ]
-    await c.sendButton(jid, '😮 ඔහ්.. එය ලස්සන නමක්! 🌸✨, නම අනුව නම් ඔබ '+g+' කෙනෙකු බව පෙනෙ, තහවුරු කිරිමට ඔබගෙ gender එක තෝරන්න ♂️♀️', '\n- ♂️♀️select gender', null, bt);
-    userdata[jid].step[1] = 3;
-  }else{
-    await c.sendMessage(jid, { text: '⚠️ ඔබගේ නාමය පිළිගත නොහැක 🚫, කරුණාකර වෙනත් නමක් යොමු කරන්න. 📝'  });
-    userdata[jid].step[1] = 2;
-  }
-}
+
 
 
 //get time ...................
@@ -294,7 +461,18 @@ const getSriLankaTimeISO = () => {
 };
 
 
-
+// tranlate....
+async function tr(s, t, text) {
+  try {
+    const response = await axios.get(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${s}&tl=${t}&dt=t&q=${encodeURIComponent(text)}`
+    );
+    return response.data[0].map(item => item[0]).join(''); // Extract and join translated segments
+  } catch (error) {
+    console.error("Error: " + error.message);
+    return text; // Fallback to original text if translation fails
+  }
+}
 
 
 
