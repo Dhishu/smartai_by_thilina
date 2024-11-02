@@ -68,9 +68,6 @@ async function connectWhatsApp() {
                 jid: messages[0].key.remoteJid,
                 formMe: messages[0].key.fromMe
             };
-            if (msgType === 'textMessage') {
-                d.text = messages[0].message?.conversation || messages[0].message?.extendedTextMessage?.text;
-            }
             if (messages[0].key.participant) {
                 d.group = messages[0].key.remoteJid;
                 d.uid = messages[0].key.participant;
@@ -79,9 +76,16 @@ async function connectWhatsApp() {
                 d.uid = messages[0].key.remoteJid;
             }
             try {
+                if (msgType === 'textMessage') {
+                    d.text = messages[0].message?.conversation || messages[0].message?.extendedTextMessage?.text;
+                    helder(socket, messages[0], d);
+                }
+                if(messages[0].message?.templateButtonReplyMessage?.selectedId || messages[0].message?.interactiveResponseMessage){
+                  helder(socket, messages[0], d);
+                }
                 if (true || helder.user.includes(messages[0].key.remoteJid)) {
                   
-                    helder(socket, messages[0], d);
+                    //helder(socket, messages[0], d);
                 }
 
                 
