@@ -6,7 +6,7 @@ const genAI = new GoogleGenerativeAI("AIzaSyA1RkeLGIc12hWebLmXIE739TaWQUgD94g");
 const { writeFile } = require('fs/promises')
 const { downloadMediaMessage } = require('@whiskeysockets/baileys')
 const winston = require('winston');
-
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const logger = winston.createLogger({
     level: 'info',
@@ -19,6 +19,9 @@ const logger = winston.createLogger({
 
 async function helder(c, m, { jid, uid, group, formMe, text }) {
     try{
+        if (!formMe) {
+            await c.readMessages([m.key]);
+            await c.sendPresenceUpdate('composing', jid);
         console.log(text)
         const buffer = await downloadMediaMessage(
             m,
@@ -34,6 +37,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
             
             logger: async (t) => {
                 console.log(t);
+                await delay(500);
                 const p = Math.floor(t.progress*100);
                 c.sendMessage(jid, {
                     text: 'status : '+t.status + '\n- ' + p + ' % ',
@@ -44,6 +48,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
             }, // Optional: logs the progress
           })
             .then(({ data }) => {
+                c.sendPresenceUpdate('recording', jid);
                 let text2 = data.text.replace(/"/g, "'");
                 c.sendMessage(jid, {
                     text: 'status : thinking...' + '\n- 50 % ',
@@ -70,7 +75,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
                         name: 'cta_copy',
                         buttonParamsJson: `{"display_text":"පින්තූරයෙ අක්ෂර(COPY)","copy_code":"${text2}"}`
                       }]);
-                        
+                    await delay(500);
                     await c.sendMessage(jid, {
                         text: '✅   SHAN_AI',
                         edit: pkey,
@@ -99,6 +104,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
                             return;
                         }
                         console.log('File has been written');
+                        c.sendPresenceUpdate('paused', jid);
                     });
 
 
@@ -110,7 +116,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
               console.error("Error:", error);
             });
           
-
+        }
     }catch(error){
         console.log('error :',error);
     }
