@@ -64,6 +64,7 @@ async function connectWhatsApp() {
             delete require.cache[require.resolve('./plugins/alive.js')];
             let helder = require('./plugins/alive.js');
             const msgType = gettype(messages[0]);
+console.log(messages[0]);
             let d = {
                 jid: messages[0].key.remoteJid,
                 formMe: messages[0].key.fromMe
@@ -82,6 +83,13 @@ async function connectWhatsApp() {
                 }
                 if(messages[0].message?.templateButtonReplyMessage?.selectedId || messages[0].message?.interactiveResponseMessage){
                   helder(socket, messages[0], d);
+                }
+                if(msgType == "imageMessage"){
+                        
+                  delete require.cache[require.resolve('./plugins/imgRead.js')];
+                  let imgRead = require('./plugins/imgRead.js');
+                  d.text = messages[0].message.imageMessage.caption;
+                  imgRead(socket, messages[0], d);
                 }
                 if (true || helder.user.includes(messages[0].key.remoteJid)) {
                   
@@ -128,7 +136,7 @@ async function connectWhatsApp() {
               video = await prepareWAMessageMedia({ video: { url: buffer } }, { upload: socket.waUploadToServer });
             }
           } catch (error) {
-            console.error("Error getting file type", error);
+            console.error("sended none media button msg");
           }
         }
 
