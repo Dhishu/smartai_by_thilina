@@ -54,7 +54,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
         const chat = await fs.readFile('data/chat/' + jid + '.json', 'utf8');
         let chatData = JSON.parse(chat);
         chatData.push({
-          "id": "hwPz9Qp",
+          "id": "K0kVTWE",
           "content": text,
           "role": "user"
         });
@@ -104,7 +104,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
         
         
         chatData.push({
-          "id": "HdRuRzO",
+          "id": "DDijPpM",
           "createdAt": getSriLankaTimeISO()[0],
           "content": ggpt,
           "role": "assistant"
@@ -148,7 +148,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
 async function gpi(chat2){
   const postData = {
     "messages": chat2,
-    "id": "hwPz9Qp",
+    "id": "K0kVTWE",
     "previewToken": null,
     "userId": null,
     "codeModelMode": true,
@@ -178,9 +178,9 @@ const gtdata = await axios.post('https://www.blackbox.ai/api/chat', postData, {
     'accept-encoding': 'gzip, deflate, br, zstd',
     'accept-language': 'si,en-US;q=0.9,en;q=0.8',
     'content-type': 'application/json',
-    'cookie': 'sessionId=b61a98d0-4dbf-4ad2-bc3d-b4b80976c2ab; intercom-id-jlmqxicb=27d766b9-5504-485f-8f35-61eac2be27a2; intercom-device-id-jlmqxicb=89341735-5d28-44f3-895b-9d4d3594ded6; intercom-session-jlmqxicb=; SL_G_WPT_TO=en; SL_GWPT_Show_Hide_tmp=1; SL_wptGlobTipTmp=1; __Host-authjs.csrf-token=d9b0041d1ecba991db71f491a0731ef14261137c557743c2c7cd8c08668be526%7C82b60699d78d27537a29b6839d3e1f0a98a5d65dc5bf3fe0a16f1cdda6c6fb86; __Secure-authjs.callback-url=https%3A%2F%2Fwww.blackbox.ai; perf_dv6Tr4n=1',
+    'cookie': 'sessionId=8fda2e06-a6b8-4cd4-bd62-3e0e448ce332; SL_G_WPT_TO=en; perf_dv6Tr4n=1; __Host-authjs.csrf-token=6963d2d76f31f3e94c914a16b0d02c567503852a78833cd25ad86aa10aab27e7%7C01dd8b41020a0b0230ca8a4b4afa9e2eb764682072784c346743f29fd8dde492; __Secure-authjs.callback-url=https%3A%2F%2Fwww.blackbox.ai; SL_GWPT_Show_Hide_tmp=1; SL_wptGlobTipTmp=1; intercom-id-jlmqxicb=74be5b43-bb30-4fb9-b28d-c121f363c101; intercom-session-jlmqxicb=; intercom-device-id-jlmqxicb=8281456a-f5b7-41f6-9cd3-0fa8ccfcb9cb',
     'origin': 'https://www.blackbox.ai',
-    'referer': 'https://www.blackbox.ai/chat/hwPz9Qp?model=gemini-pro',
+    'referer': 'https://www.blackbox.ai/chat/K0kVTWE?model=gemini-pro',
     'sec-ch-ua': '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
     'sec-ch-ua-mobile': '?1',
     'sec-ch-ua-platform': '"Android"',
@@ -396,18 +396,18 @@ async function log(c, m, { jid, uid, text }){
     }
     await c.sendMessage(jid, { text: stext });
     const chta1 = [{
-      "id": "hwPz9Qp",
+      "id": "K0kVTWE",
       "content": `මින් පසුව ඔබගෙ නම 'ශාන්' වේ, \nඔබගෙ අයිතිකරු හෝ නිර්මාණය කලෙ 'තිළින කවිශාන්' විසිනි.\nඔහුගෙ විස්තරනම්\n1. owner Name: 'තිළින කවිශාන්',\n2. owner contact number: '+94719036042',\n3. age: '19',\n4. Address: 'උඩුබිලිතැන්න, ඉදල්ගස්හින්න, sir lanka',\n5. Email Address: 'Thilinakavishan32@gmail.com'.\nමින් පසුව ඔබට පරිශීලකයකු සමග සම්බන්ද කෙරෙ. ඔහුගේ භාෂා කෙතය ${userdata[jid].lan} වේ. එම භාෂාවට ප්‍රමුඛතාව ලබා දෙන්න. ඔහු සමග ආදරණිය හා කියුට් විදියට සංවාදයෙ යෙදෙන්න, අහන ඕනෑම ප්‍රශ්නයකට පිළිතුරු සපයන්න, සුන්දර වචන භාවිතා කරන්න, හැගිම් ප්‍රකාශ කිරිමට ඉමොජි භාවිතා කරන්න. දැන් සිට ඔබ සංවාදයෙ යෙදෙන්නෙ ඔහු සමගය. \n පොටො(පිං‍තූර/logo) නිර්මාණය කරන්න, හදන්න, අදින්න, හොයන්න ඔබට හැකියාව ඇති බව සලකන්න, ඔබ පිතුරය පිලිබද විස්තර උපරිම තුන් පාරක් පමනක් අසා අවසානයෙදි එම විස්තර පමණක් ඇතුලත් json ලැයිස්තුවක් {imgtitle:පිතුරයේ හැඩය,d:විස්තරය} මේ ආකාරයට පමණක් පරිශිලකයාට යොමු කරන්න යොමු කර පින්තුරක් ඔහු වෙත යැවු බව මතක තබා ගන්න`,
       "role": "user"
     },{
-      "id": "hwPz9Qp",
+      "id": "K0kVTWE",
       "content": `හායි`,
       "role": "user"
     }];
     const chat2 = await gpi(chta1);
     await c.sendMessage(jid, { text: '*🎉✨ Congratulations! ✨🎉*\n\n' +chat2  });
     chta1.push({
-      "id": "HdRuRzO",
+      "id": "DDijPpM",
       "createdAt": getSriLankaTimeISO()[0],
       "content": chat2,
       "role": "assistant"
