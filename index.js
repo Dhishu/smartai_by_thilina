@@ -8,6 +8,14 @@ const {
     useMultiFileAuthState, 
     delay
 } = require('@whiskeysockets/baileys');
+global.key = {
+  geminiUser : "NOWQ1HZ",
+  geminiAss : "SA7ZxfM",
+  geminiCok : "sessionId=8fda2e06-a6b8-4cd4-bd62-3e0e448ce332; intercom-id-jlmqxicb=74be5b43-bb30-4fb9-b28d-c121f363c101; intercom-session-jlmqxicb=; intercom-device-id-jlmqxicb=8281456a-f5b7-41f6-9cd3-0fa8ccfcb9cb; SL_G_WPT_TO=en; SL_GWPT_Show_Hide_tmp=1; SL_wptGlobTipTmp=1; __Host-authjs.csrf-token=c9e223284bd9140608d152930b6752f4ac8b170c488f3fd6cf4ce7bc91b939a6%7C140c4e0db7deeb0850046a9f249532a38bd10bc4eeebf98f089815444b76da7e; __Secure-authjs.callback-url=https%3A%2F%2Fwww.blackbox.ai"
+};
+
+
+
 
 var socket;
 
