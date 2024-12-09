@@ -73,7 +73,7 @@ async function helder(c, m, { jid, uid, group, formMe, text }) {
         await c.sendPresenceUpdate('paused', jid);
         const jsonMatches = ggpt.match(/({[\s\S]*?}|[\[][\s\S]*?[\]])/g);
 
-        if (jsonMatches) {
+        if (false) {
           await c.sendPresenceUpdate('recording', jid) 
           for (const jsonStr of jsonMatches) {
             try {
